@@ -1,5 +1,8 @@
 module main
 
+
+import lexer
+
 fn main() {
-	println('Hello World!')
+	println(lexer.Lex.new())
 }
