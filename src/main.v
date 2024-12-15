@@ -4,5 +4,5 @@ module main
 import lexer
 
 fn main() {
-	println(lexer.Lex.new())
+	println(lexer.Lex.new(""))
 }
