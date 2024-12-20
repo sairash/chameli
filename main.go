@@ -2,6 +2,8 @@ package main
 
 import (
 	"chameli/chameli_error"
+	"chameli/lexer"
+	"fmt"
 )
 
 func main() {
@@ -16,4 +18,7 @@ func main() {
 	}
 
 	x.ErrorGen()
+
+	lex := lexer.New("./test/lex/lua.gm")
+	fmt.Println(lex)
 }
