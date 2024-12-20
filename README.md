@@ -1,6 +1,6 @@
 ### Chameli
 
-A work in progress ast (code) generator written in vlang.
+A work in progress ast (code) generator written in golang.
 
 __Concept__
 
