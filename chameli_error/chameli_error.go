@@ -48,7 +48,7 @@ func (ce Error) FileBeforeAfterErrorSplitter() ([][]string, error) {
 	return [][]string{fileContents[start:ce.CurLine], []string{fileContents[ce.CurLine]}}, nil
 }
 
-func pretty_error(lines [][]string, init int) {
+func PrettyError(lines [][]string, init int) string {
 	return_string := fmt.Sprintf("%d| %s", init, lines[len(lines)-1][0])
 	for i := len(lines[0]) - 1; i >= 0; i-- {
 		if lines[0][i] != "" {
@@ -56,7 +56,7 @@ func pretty_error(lines [][]string, init int) {
 			return_string = fmt.Sprintf("%d| %s \n", init, lines[0][i]) + return_string
 		}
 	}
-	fmt.Println(return_string)
+	return return_string
 }
 
 func (er Error) ErrorGen() {
@@ -76,7 +76,7 @@ func (er Error) ErrorGen() {
 		return
 	}
 
-	pretty_error(file_contains, er.CurLine)
+	fmt.Println(PrettyError(file_contains, er.CurLine))
 	start := er.Range[0]
 	if start > width {
 		start = start % width
