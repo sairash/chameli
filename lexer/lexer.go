@@ -21,25 +21,50 @@ type Lex struct {
 }
 
 func (l *Lex) Next() (*token.Token, *chameli_error.Error) {
-	l.SkipWhiteSpace()
+	l.skipWhiteSpace()
 
 	next, eof := l.consume()
 
 	if eof {
-		end_token := token.EOFTOKEN.AddRange([2]int{l.X, l.X})
-		return &end_token, nil
+		return token.EOFTOKEN.AddRange([2]int{l.X, l.X}), nil
 	}
 
 	return l.Matcher(next)
 
 }
 
-func (l *Lex) Matcher(next_char byte) (*token.Token, *chameli_error.Error) {
-	switch next_char {
-	case '\n':
-		tok := token.EOLTOKEN.AddRange([2]int{l.X, l.X})
-		return &tok, nil
+func (l *Lex) match_identifier(cur_char rune) (*token.Token, *chameli_error.Error) {
+	return_string := string(cur_char)
+	start_pos := l.X
 
+	for {
+		next_char, eof := l.peek()
+
+		if eof {
+			break
+		}
+
+		if unicode.IsLetter(next_char) || unicode.IsDigit(next_char) || next_char == '_' {
+			return_string += string(next_char)
+			l.consume()
+			continue
+		}
+
+		break
+	}
+	return token.IDENTIFIERTOKEN.Modify(func(t *token.Token) {
+		t.Hint = return_string
+		t.TokenRange[0] = start_pos
+		t.TokenRange[1] = l.X
+	}), nil
+}
+
+func (l *Lex) Matcher(next_char rune) (*token.Token, *chameli_error.Error) {
+	switch {
+	case next_char == '\n':
+		return token.EOLTOKEN.AddRange([2]int{l.X, l.X}), nil
+	case unicode.IsLetter(next_char):
+		return l.match_identifier(next_char)
 	}
 	return nil, l.ErrorGenerator("Lexing File", chameli_error.ErrorUnexpectedToken{Token: string(next_char)})
 }
@@ -56,7 +81,7 @@ func (l *Lex) ErrorGenerator(from string, error_data chameli_error.ErrorInterfac
 	}
 }
 
-func (l *Lex) SkipWhiteSpace() {
+func (l *Lex) skipWhiteSpace() {
 	for {
 		data, eof := l.peek()
 		if eof || data == '\n' || !unicode.IsSpace(rune(data)) {
@@ -69,15 +94,15 @@ func (l *Lex) SkipWhiteSpace() {
 
 }
 
-func (l *Lex) peek() (byte, bool) {
+func (l *Lex) peek() (rune, bool) {
 	if l.X >= l.FileLen {
 		return 0, true
 	}
 
-	return l.FileData[l.X], false
+	return rune(l.FileData[l.X]), false
 }
 
-func (l *Lex) consume() (byte, bool) {
+func (l *Lex) consume() (rune, bool) {
 	next, eof := l.peek()
 	if eof {
 		return 0, true
