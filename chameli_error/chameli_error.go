@@ -7,26 +7,29 @@ import (
 	"os"
 	"strings"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 type ErrorInterface interface {
 	Output() error
 }
 
+var DebugEnabled = true
+
 type Error struct {
 	Path      string
 	CurLine   int
 	CurCol    int
-	Range     []int
+	Range     [2]int
 	CodeError bool
+	From      string
 	Error     ErrorInterface
 }
 
-func (ce Error) FileBeforeAfterErrorSplitter() ([][]string, error) {
+func (ce Error) FileBeforeAfterErrorSplitter() ([]string, string, error) {
 	file, err := os.Open(ce.Path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer file.Close()
 
@@ -37,23 +40,27 @@ func (ce Error) FileBeforeAfterErrorSplitter() ([][]string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	start := 0
-	if ce.CurLine-3 > 0 {
-		start = ce.CurLine - 3
+	for _, val := range []int{3, 2, 1} {
+		if ce.CurLine-val > 0 {
+			start = ce.CurLine - val
+			break
+		}
 	}
 
-	return [][]string{fileContents[start:ce.CurLine], []string{fileContents[ce.CurLine]}}, nil
+	return fileContents[start:ce.CurLine], fileContents[ce.CurLine], nil
 }
 
-func PrettyError(lines [][]string, init int) string {
-	return_string := fmt.Sprintf("%d| %s", init, lines[len(lines)-1][0])
-	for i := len(lines[0]) - 1; i >= 0; i-- {
-		if lines[0][i] != "" {
+func PrettyError(lines []string, cur_line string, init int) string {
+	init = init + 1
+	return_string := fmt.Sprintf("%d| %s", init, cur_line)
+	for i := len(lines) - 1; i >= 0; i-- {
+		if lines[i] != "" {
 			init = init - 1
-			return_string = fmt.Sprintf("%d| %s \n", init, lines[0][i]) + return_string
+			return_string = fmt.Sprintf("%d| %s \n", init, lines[i]) + return_string
 		}
 	}
 	return return_string
@@ -61,22 +68,26 @@ func PrettyError(lines [][]string, init int) string {
 
 func (er Error) ErrorGen() {
 	fmt.Println()
+	if DebugEnabled {
+		fmt.Println("Error occured while: ", er.From)
+	}
+
 	fmt.Println("File: ", er.Path)
 	fmt.Println()
-	file_contains, err := er.FileBeforeAfterErrorSplitter()
+	file_contains, cur_line, err := er.FileBeforeAfterErrorSplitter()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	width, _, err := terminal.GetSize(int(os.Stdin.Fd()))
+	width, _, err := term.GetSize(int(os.Stdin.Fd()))
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(PrettyError(file_contains, er.CurLine))
+	fmt.Println(PrettyError(file_contains, cur_line, er.CurLine))
 	start := er.Range[0]
 	if start > width {
 		start = start % width
@@ -94,4 +105,12 @@ type ErrorFileIO struct {
 
 func (e ErrorFileIO) Output() error {
 	return fmt.Errorf("Failed to open path. path: %s", e.FilePath)
+}
+
+type ErrorUnexpectedToken struct {
+	Token string
+}
+
+func (e ErrorUnexpectedToken) Output() error {
+	return fmt.Errorf("There was an unexpected token: %s", e.Token)
 }
