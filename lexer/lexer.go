@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"chameli/chameli_error"
 	"chameli/token"
 	"os"
 	"unicode"
@@ -8,6 +9,7 @@ import (
 
 type Lex struct {
 	X                  int
+	Path               string
 	CurLine            int
 	CurCol             int
 	FileData           []byte
@@ -18,26 +20,40 @@ type Lex struct {
 	ConsumedToken      []token.Token
 }
 
-func (l *Lex) Next() token.Token {
+func (l *Lex) Next() (*token.Token, *chameli_error.Error) {
 	l.SkipWhiteSpace()
 
 	next, eof := l.consume()
 
 	if eof {
-		return token.EOFTOKEN.AddRange([2]int{l.X, l.X})
+		end_token := token.EOFTOKEN.AddRange([2]int{l.X, l.X})
+		return &end_token, nil
 	}
 
 	return l.Matcher(next)
 
 }
 
-func (l *Lex) Matcher(next_char byte) token.Token {
+func (l *Lex) Matcher(next_char byte) (*token.Token, *chameli_error.Error) {
 	switch next_char {
 	case '\n':
-		return token.EOLTOKEN.AddRange([2]int{l.X, l.X})
+		tok := token.EOLTOKEN.AddRange([2]int{l.X, l.X})
+		return &tok, nil
 
 	}
-	return token.EOLTOKEN.AddRange([2]int{l.X, l.X})
+	return nil, l.ErrorGenerator("Lexing File", chameli_error.ErrorUnexpectedToken{Token: string(next_char)})
+}
+
+func (l *Lex) ErrorGenerator(from string, error_data chameli_error.ErrorInterface) *chameli_error.Error {
+	return &chameli_error.Error{
+		Path:      l.Path,
+		CurLine:   l.CurLine,
+		CurCol:    l.CurCol,
+		Range:     [2]int{l.X, l.X},
+		CodeError: true,
+		From:      from,
+		Error:     error_data,
+	}
 }
 
 func (l *Lex) SkipWhiteSpace() {
@@ -88,9 +104,10 @@ func New(path string) Lex {
 	file_data := GoThroughFile(path)
 	return Lex{
 		X:        0,
-		CurLine:  1,
-		CurCol:   1,
+		CurLine:  0,
+		CurCol:   0,
 		FileData: file_data,
 		FileLen:  len(file_data),
+		Path:     path,
 	}
 }
