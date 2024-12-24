@@ -94,7 +94,13 @@ func (er Error) ErrorGen() {
 	}
 
 	fmt.Print(cli.Red)
-	fmt.Println(fmt.Sprintf("%s%s", strings.Repeat(" ", start), strings.Repeat("~", (er.Range[1]-er.Range[0]))), cli.Reset)
+
+	str_to_point := "^"
+	if er.Range[0] != er.Range[1] {
+		str_to_point = fmt.Sprintf("%s%s", strings.Repeat(" ", start), strings.Repeat("~", (er.Range[1]-er.Range[0])))
+	}
+
+	fmt.Println(str_to_point, cli.Reset)
 	fmt.Println(er.Error.Output())
 	fmt.Println()
 }
