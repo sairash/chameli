@@ -45,4 +45,22 @@ var (
 		TokenRange: [2]int{},
 		Hint:       "",
 	}
+	NUMBERTOKEN = Token{
+		Value:      "number",
+		TokenType:  NUMBER,
+		TokenRange: [2]int{},
+		Hint:       "",
+	}
+	STRINGTOKEN = Token{
+		Value:      "string",
+		TokenType:  STRING,
+		TokenRange: [2]int{},
+		Hint:       "",
+	}
+	OPERATORTOKEN = Token{
+		Value:      "operator",
+		TokenType:  OPERATOR,
+		TokenRange: [2]int{},
+		Hint:       "",
+	}
 )
