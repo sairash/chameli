@@ -3,6 +3,7 @@ package chameli_error
 import (
 	"bufio"
 	"chameli/cli"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -119,4 +120,16 @@ type ErrorUnexpectedToken struct {
 
 func (e ErrorUnexpectedToken) Output() error {
 	return fmt.Errorf("There was an unexpected token: %s", e.Token)
+}
+
+type ErrorUnexpectedEOF struct {
+	ExpectingToken string
+}
+
+func (e ErrorUnexpectedEOF) Output() error {
+	text_to_return := "File ended abruptly"
+	if e.ExpectingToken != "" {
+		text_to_return += "was expecting " + e.ExpectingToken
+	}
+	return errors.New(text_to_return)
 }
