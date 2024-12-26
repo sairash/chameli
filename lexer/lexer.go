@@ -8,16 +8,12 @@ import (
 )
 
 type Lex struct {
-	X                  int
-	Path               string
-	CurLine            int
-	CurCol             int
-	FileData           []byte
-	FileLen            int
-	NextToken          []token.Token
-	CurToken           token.Token
-	BeforeConsumeToken []token.Token
-	ConsumedToken      []token.Token
+	X        int
+	Path     string
+	CurLine  int
+	CurCol   int
+	FileData []byte
+	FileLen  int
 }
 
 var (
