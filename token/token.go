@@ -5,6 +5,7 @@ const (
 	STRING
 	NUMBER
 	OPERATOR
+	SEPERETOR
 	EOF
 	EOL
 	COMMENT
@@ -60,6 +61,12 @@ var (
 	OPERATORTOKEN = Token{
 		Value:      "operator",
 		TokenType:  OPERATOR,
+		TokenRange: [2]int{},
+		Hint:       "",
+	}
+	SEPERETORTOKEN = Token{
+		Value:      "separator",
+		TokenType:  SEPERETOR,
 		TokenRange: [2]int{},
 		Hint:       "",
 	}
