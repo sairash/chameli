@@ -65,7 +65,7 @@ func PrettyError(lines []string, cur_line string, init int) (int, string) {
 			return_string = fmt.Sprintf("%d| %s \n", init, lines[i]) + return_string
 		}
 	}
-	return len(first_line_pos_string) - 1, return_string
+	return len(first_line_pos_string), return_string
 }
 
 func (er Error) ErrorGen() {
@@ -102,7 +102,7 @@ func (er Error) ErrorGen() {
 	start_string := strings.Repeat(" ", start+amount_to_add_in_start)
 	str_to_point := ""
 	if er.Range[0] != er.Range[1] {
-		str_to_point = fmt.Sprintf("%s%s", start_string, strings.Repeat("~", (er.Range[1]-er.Range[0])))
+		str_to_point = fmt.Sprintf("%s%s", start_string, strings.Repeat("~", ((er.Range[1]+1)-er.Range[0])))
 	} else {
 		str_to_point = fmt.Sprintf("%s%s", start_string, "^")
 	}
