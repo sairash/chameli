@@ -33,9 +33,42 @@ func TestNextToken(t *testing.T) {
 		}
 
 		if tok.TokenType == token.EOF {
-			if tok.TokenRange[0] != 6 && tok.TokenRange[1] != 6 {
-				t.Fatalf("Expected Range Value to be (6, 6) but found (%d, %d)", tok.TokenRange[0], tok.TokenRange[1])
+			if tok.TokenRange[0] != 5 && tok.TokenRange[1] != 5 {
+				t.Fatalf("Expected Range Value to be (5, 5) but found (%d, %d)", tok.TokenRange[0], tok.TokenRange[1])
 			}
+			break
+		}
+	}
+
+}
+
+func TestMatchToken(t *testing.T) {
+	lex := New("../test/lex/multiple_lex.gm")
+
+	if len(lex.FileData) == 0 {
+		t.Fatal("File Data cannot be 0")
+	}
+
+	expected_tokens := []uint{token.IDENTIFIER, token.OPERATOR, token.STRING, token.OPERATOR, token.STRING, token.SEPERETOR, token.STRING, token.SEPERETOR, token.IDENTIFIER, token.OPERATOR, token.NUMBER, token.OPERATOR, token.NUMBER, token.SEPERETOR, token.EOF}
+	key := 0
+
+	for {
+		tok, err := lex.Next()
+		if err != nil {
+
+			if err.From != "Lexing File" {
+				t.Fatalf("Error occoured: ( %s)", err.Error.Output())
+			}
+
+			break
+		}
+
+		if expected_tokens[key] != tok.TokenType {
+			t.Fatalf("Expected token to find iota was %d but found %d instead in key %d", expected_tokens[key], tok.TokenType, key)
+		}
+		key += 1
+
+		if tok.TokenType == token.EOF {
 			break
 		}
 	}
