@@ -19,9 +19,10 @@ func TestErrorGen(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ret_string := len(PrettyError(file_data, cur_line, x.CurLine))
-	if ret_string != 84 {
-		t.Fatalf("Required number of file data is %d but found %d instead.", 83, ret_string)
+	_, ret_string := PrettyError(file_data, cur_line, x.CurLine)
+	ret_string_len := len(ret_string)
+	if ret_string_len != 84 {
+		t.Fatalf("Required number of file data is %d but found %d instead.", 83, ret_string_len)
 	}
 
 }

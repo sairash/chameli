@@ -55,16 +55,17 @@ func (ce Error) FileBeforeAfterErrorSplitter() ([]string, string, error) {
 	return fileContents[start:ce.CurLine], fileContents[ce.CurLine], nil
 }
 
-func PrettyError(lines []string, cur_line string, init int) string {
+func PrettyError(lines []string, cur_line string, init int) (int, string) {
 	init = init + 1
-	return_string := fmt.Sprintf("%d| %s", init, cur_line)
+	first_line_pos_string := fmt.Sprintf("%d| ", init)
+	return_string := first_line_pos_string + cur_line
 	for i := len(lines) - 1; i >= 0; i-- {
 		if lines[i] != "" {
 			init = init - 1
 			return_string = fmt.Sprintf("%d| %s \n", init, lines[i]) + return_string
 		}
 	}
-	return return_string
+	return len(first_line_pos_string) - 1, return_string
 }
 
 func (er Error) ErrorGen() {
@@ -88,7 +89,9 @@ func (er Error) ErrorGen() {
 		return
 	}
 
-	fmt.Println(PrettyError(file_contains, cur_line, er.CurLine))
+	amount_to_add_in_start, value_to_print := PrettyError(file_contains, cur_line, er.CurLine)
+	fmt.Println(value_to_print)
+
 	start := er.Range[0]
 	if start > width {
 		start = start % width
@@ -96,9 +99,12 @@ func (er Error) ErrorGen() {
 
 	fmt.Print(cli.Red)
 
-	str_to_point := "^"
+	start_string := strings.Repeat(" ", start+amount_to_add_in_start)
+	str_to_point := ""
 	if er.Range[0] != er.Range[1] {
-		str_to_point = fmt.Sprintf("%s%s", strings.Repeat(" ", start), strings.Repeat("~", (er.Range[1]-er.Range[0])))
+		str_to_point = fmt.Sprintf("%s%s", start_string, strings.Repeat("~", (er.Range[1]-er.Range[0])))
+	} else {
+		str_to_point = fmt.Sprintf("%s%s", start_string, "^")
 	}
 
 	fmt.Println(str_to_point, cli.Reset)
