@@ -133,3 +133,11 @@ func (e ErrorUnexpectedEOF) Output() error {
 	}
 	return errors.New(text_to_return)
 }
+
+type ErrorBalanceBracket struct {
+	Bracket string
+}
+
+func (e ErrorBalanceBracket) Output() error {
+	return fmt.Errorf("Couldn't find the opening tag %s", e.Bracket)
+}

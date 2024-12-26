@@ -20,6 +20,18 @@ type Lex struct {
 	ConsumedToken      []token.Token
 }
 
+var (
+	bracket_balance     = []rune{}
+	bracket_counterpart = map[rune]rune{
+		'{': '}',
+		'}': '{',
+		'(': ')',
+		')': '(',
+		'[': ']',
+		']': '[',
+	}
+)
+
 func (l *Lex) Next() (*token.Token, *chameli_error.Error) {
 	l.skipWhiteSpace()
 
@@ -150,6 +162,36 @@ func (l *Lex) matchOperator(cur_char rune) (*token.Token, *chameli_error.Error) 
 
 }
 
+func (l *Lex) matchBracketOpen(cur_char rune) (*token.Token, *chameli_error.Error) {
+	bracket_balance = append(bracket_balance, bracket_counterpart[cur_char])
+	return token.BRACKETTOKEN.Modify(func(t *token.Token) {
+		t.Hint = string(cur_char)
+		t.TokenRange[0] = l.xValue()
+		t.TokenRange[1] = l.xValue()
+	}), nil
+}
+
+func (l *Lex) matchBracketClose(cur_char rune) (*token.Token, *chameli_error.Error) {
+	if len(bracket_balance) <= 0 {
+		return nil, l.ErrorGenerator("match bracket", chameli_error.ErrorBalanceBracket{Bracket: string(bracket_counterpart[cur_char])})
+	}
+
+	value := bracket_balance[len(bracket_balance)-1]
+
+	if value != cur_char {
+		return nil, l.ErrorGenerator("match bracket", chameli_error.ErrorBalanceBracket{Bracket: string(bracket_counterpart[cur_char])})
+	}
+
+	bracket_balance = bracket_balance[:len(bracket_balance)-1]
+
+	return token.BRACKETTOKEN.Modify(func(t *token.Token) {
+		t.Hint = string(cur_char)
+		t.TokenRange[0] = l.xValue()
+		t.TokenRange[1] = l.xValue()
+		t.TokenType = token.CLOSEBRACKET
+	}), nil
+}
+
 func (l *Lex) Matcher(next_char rune) (*token.Token, *chameli_error.Error) {
 	switch {
 	case next_char == '\n':
@@ -168,6 +210,11 @@ func (l *Lex) Matcher(next_char rune) (*token.Token, *chameli_error.Error) {
 			t.TokenRange[0] = l.xValue()
 			t.TokenRange[1] = l.xValue()
 		}), nil
+
+	case next_char == '[' || next_char == '{' || next_char == '(':
+		return l.matchBracketOpen(next_char)
+	case next_char == ']' || next_char == '}' || next_char == ')':
+		return l.matchBracketClose(next_char)
 	}
 	return nil, l.ErrorGenerator("Lexing Matcher", chameli_error.ErrorUnexpectedToken{Token: string(next_char)})
 }

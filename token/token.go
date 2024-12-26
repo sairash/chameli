@@ -6,6 +6,8 @@ const (
 	NUMBER
 	OPERATOR
 	SEPERETOR
+	CLOSEBRACKET
+	OPENBRACKET
 	EOF
 	EOL
 	COMMENT
@@ -67,6 +69,12 @@ var (
 	SEPERETORTOKEN = Token{
 		Value:      "separator",
 		TokenType:  SEPERETOR,
+		TokenRange: [2]int{},
+		Hint:       "",
+	}
+	BRACKETTOKEN = Token{
+		Value:      "bracket",
+		TokenType:  OPENBRACKET,
 		TokenRange: [2]int{},
 		Hint:       "",
 	}
