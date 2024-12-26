@@ -2,6 +2,7 @@ package token
 
 const (
 	IDENTIFIER = iota
+	DIRECTIVE
 	STRING
 	NUMBER
 	OPERATOR
@@ -45,6 +46,12 @@ var (
 	IDENTIFIERTOKEN = Token{
 		Value:      "identifier",
 		TokenType:  IDENTIFIER,
+		TokenRange: [2]int{},
+		Hint:       "",
+	}
+	DIRECTIVETOKEN = Token{
+		Value:      "directive",
+		TokenType:  DIRECTIVE,
 		TokenRange: [2]int{},
 		Hint:       "",
 	}

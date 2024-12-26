@@ -91,7 +91,14 @@ func (l *Lex) matchIdentifier(cur_char rune) (*token.Token, *chameli_error.Error
 
 		break
 	}
-	return token.IDENTIFIERTOKEN.Modify(func(t *token.Token) {
+
+	token_to_return := token.IDENTIFIERTOKEN
+	if cur_char == '%' {
+		token_to_return = token.DIRECTIVETOKEN
+
+	}
+
+	return token_to_return.Modify(func(t *token.Token) {
 		t.Hint = return_string
 		t.TokenRange[0] = start_pos
 		t.TokenRange[1] = l.xValue()
@@ -194,7 +201,7 @@ func (l *Lex) Matcher(next_char rune) (*token.Token, *chameli_error.Error) {
 		return token.EOLTOKEN.AddRange([2]int{l.xValue(), l.xValue()}), nil
 	case unicode.IsDigit(next_char): // numbers 0 .. 9
 		return l.matchNumber(next_char)
-	case unicode.IsLetter(next_char): // characters a .. z & A .. Z
+	case unicode.IsLetter(next_char) || next_char == '%' || next_char == '_': // characters a .. z & A .. Z
 		return l.matchIdentifier(next_char)
 	case next_char == '"' || next_char == '`' || next_char == '\'':
 		return l.matchString(next_char)

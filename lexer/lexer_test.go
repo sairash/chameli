@@ -49,7 +49,7 @@ func TestMatchToken(t *testing.T) {
 		t.Fatal("File Data cannot be 0")
 	}
 
-	expected_tokens := []uint{token.IDENTIFIER, token.OPERATOR, token.STRING, token.OPERATOR,
+	expected_tokens := []uint{token.DIRECTIVE, token.OPERATOR, token.STRING, token.OPERATOR,
 		token.STRING, token.SEPERETOR, token.STRING, token.SEPERETOR, token.IDENTIFIER, token.OPERATOR,
 		token.NUMBER, token.OPERATOR, token.NUMBER, token.SEPERETOR, token.IDENTIFIER, token.OPERATOR,
 		token.OPENBRACKET, token.IDENTIFIER, token.OPENBRACKET, token.STRING, token.CLOSEBRACKET, token.CLOSEBRACKET,
