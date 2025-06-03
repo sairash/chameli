@@ -3,6 +3,7 @@ package chameli_error
 import (
 	"bufio"
 	"chameli/cli"
+	"chameli/token"
 	"errors"
 	"fmt"
 	"os"
@@ -146,4 +147,16 @@ type ErrorBalanceBracket struct {
 
 func (e ErrorBalanceBracket) Output() error {
 	return fmt.Errorf("Couldn't find the opening tag %s", e.Bracket)
+}
+
+type ErrorMisMatch struct {
+	Expected token.Token
+	Found    token.Token
+}
+
+func (e ErrorMisMatch) Output() error {
+	if !e.Expected.IsHintEmpty() {
+		return fmt.Errorf("Expected %s with value %s, but found %s with value %s instead", e.Expected.Value, e.Expected.GetHintAsString(), e.Found.Value, e.Found.GetHintAsString())
+	}
+	return fmt.Errorf("Expected %s but found %s", e.Expected.Value, e.Found.Value)
 }
