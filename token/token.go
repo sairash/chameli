@@ -1,5 +1,10 @@
 package token
 
+import (
+	"fmt"
+	"strconv"
+)
+
 const (
 	IDENTIFIER = iota
 	DIRECTIVE
@@ -14,11 +19,44 @@ const (
 	COMMENT
 )
 
+const (
+	ASSIGN = "="
+)
+
 type Token struct {
 	Hint       interface{}
 	Value      string
 	TokenType  uint
 	TokenRange [2]int
+}
+
+func (t Token) GetHintAsString() string {
+	switch v := t.Hint.(type) {
+	case string:
+		return v
+	case int:
+		return strconv.Itoa(v)
+	case bool:
+		return strconv.FormatBool(v)
+	case float32:
+		return fmt.Sprintf("%f", v)
+	}
+
+	return ""
+}
+
+func (t Token) IsHintEmpty() bool {
+	switch t.Hint.(type) {
+	case string:
+		return t.Hint != ""
+	case int:
+		return t.Hint != 0
+	case bool:
+		return false
+	case float32:
+		return t.Hint == 0.00
+	}
+	return true
 }
 
 func (t Token) AddRange(range_token [2]int) *Token {
