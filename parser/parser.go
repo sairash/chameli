@@ -67,8 +67,23 @@ func (p *Parser) parseIdentifier() (ast.Node, *chameli_error.Error) {
 		Value:     token.ASSIGN,
 		TokenType: token.OPERATOR,
 	})) {
+		astmt, err := p.parseAssignment()
+		if err != nil {
+			return nil, err
+		}
+
+		astmt.Name = stmt
+		return astmt, nil
+
 		// Todo: Assignment
 	}
+
+	return stmt, nil
+}
+
+func (p *Parser) parseAssignment() (*ast.Assign, *chameli_error.Error) {
+	stmt := &ast.Assign{}
+	p.eat(token.Token{}, false)
 
 	return stmt, nil
 }
